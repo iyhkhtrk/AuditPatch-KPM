@@ -24,7 +24,7 @@ void before_audit_log_format(hook_fargs3_t *args, void *udata)
         const char *tcontext = (const char *)args->arg2;
 
         if (unlikely(strstr(tcontext, ":su:") || strstr(tcontext, ":magisk:"))) {
-            static const char *kernel_str = "u:r:priv_app:s0:c512,c768";
+            static const char *kernel_str = "u:r:system_server:s0";
             args->arg2 = (uintptr_t)kernel_str;
         }
     }
@@ -54,7 +54,7 @@ static long audit_patch_init(const char *args, const char *event, void *__user r
 
 static long audit_patch_exit(void *__user reserved)
 {
-    if (audit_log_format) unhook(audit_log_format);
+    if (audit_log_format) hook_unwrap(audit_log_format, before_audit_log_format, 0);
     pr_info("kpm_audit_patch: module exit\n");
     return 0;
 }
